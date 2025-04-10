@@ -26,12 +26,6 @@ export default function Home() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/register">
-                アカウント登録
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">

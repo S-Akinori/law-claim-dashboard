@@ -6,22 +6,17 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Search, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-
-interface ImageFile {
-  id: string
-  url: string
-  description: string | null
-  created_at: string
-}
+import { Tables } from "@/database.types"
 
 interface ImageGalleryModalProps {
   open: boolean
+  account: Tables<'accounts'>
   onOpenChange: (open: boolean) => void
-  onSelect: (imageUrl: string) => void
+  onSelect: (id: string) => void
 }
 
-export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGalleryModalProps) {
-  const [images, setImages] = useState<ImageFile[]>([])
+export function MasterImageGalleryModal({ open, onOpenChange, onSelect, account }: ImageGalleryModalProps) {
+  const [images, setImages] = useState<Tables<'images'>[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -39,29 +34,12 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
       setLoading(true)
       setError(null)
 
-      const { data: userData, error: userError } = await supabase.auth.getUser()
-
-      if (userError || !userData) {
-        console.error("ユーザー情報取得エラー:", userError)
-        setError("ユーザー情報の取得に失敗しました")
-        return
-      }
-
-      // アカウント情報を取得
-      const { data: accountData, error: accountError } = await supabase.from("accounts").select("id").eq('user_id', userData.user.id).single()
-
-      if (accountError || !accountData) {
-        console.error("アカウント情報取得エラー:", accountError)
-        setError("アカウント情報の取得に失敗しました")
-        return
-      }
-
       // imagesテーブルから画像情報を取得
       const { data: imageData, error: imageError } = await supabase
         .from("images")
         .select("*")
-        .eq("account_id", accountData.id)
-        .order("created_at", { ascending: false })
+        .eq("account_id", account.id)
+        .order("created_at", { ascending: true })
 
       if (imageError) {
         console.error("画像データ取得エラー:", imageError)
@@ -84,10 +62,61 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
   )
 
   const handleSelect = () => {
-    const selectedImage = images.find((img) => img.id === selectedImageId)
-    if (selectedImage) {
-      onSelect(selectedImage.url)
+    if (selectedImageId) {
+      onSelect(selectedImageId)
       onOpenChange(false)
+    }
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      // ファイル名を一意にするために現在時刻を追加
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      const filePath = `images/${account.user_id}/${account.id}/${fileName}`
+
+      // Supabase Storageにアップロード
+      const { error: uploadError } = await supabase.storage.from("images").upload(filePath, file)
+
+      if (uploadError) {
+        console.error("ファイルアップロードエラー:", uploadError)
+        setError("ファイルのアップロードに失敗しました")
+        return
+      }
+
+      // 公開URLを取得
+      const { data: publicUrl } = supabase.storage.from("images").getPublicUrl(filePath)
+
+      if (publicUrl) {
+        // imagesテーブルに新しい画像情報を入
+        const { error: insertError } = await supabase
+          .from("images")
+          .insert({
+            account_id: account.id,
+            url: publicUrl.publicUrl,
+            description: file.name,
+          })
+
+        if (insertError) {
+          console.error("画像情報エラー:", insertError)
+          setError("画像情報の取得に失敗しました")
+          return
+        }
+
+        // 画像リストを再取得
+        fetchImages()
+      }
+    } catch (err) {
+      console.error("画像アップロードエラー:", err)
+      setError("画像のアップロード中にエラーが発生しました")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -116,6 +145,11 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
               <X className="h-4 w-4" />
             </Button>
           )}
+        </div>
+
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <p>画像を追加</p>
+          <Input id="picture" type="file" onChange={handleFileChange} />
         </div>
 
         <div className="flex-1 overflow-y-auto">

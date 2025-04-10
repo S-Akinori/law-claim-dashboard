@@ -12,7 +12,6 @@ import { createClient } from "@/lib/supabase/client"
 
 interface ScheduledMessage {
   id: string
-  account_id: string
   day_offset: number
   hour: number
   message: string
@@ -88,7 +87,7 @@ export function ScheduledMessageDialog({ open, onOpenChange, message, onSubmit }
       if (isEdit && message) {
         // 既存のメッセージを更新
         const { error: updateError } = await supabase
-          .from("scheduled_messages")
+          .from("master_scheduled_messages")
           .update({
             day_offset: dayOffset,
             hour: hour,
@@ -108,8 +107,7 @@ export function ScheduledMessageDialog({ open, onOpenChange, message, onSubmit }
         })
       } else {
         // 新規メッセージを作成
-        const { error: insertError } = await supabase.from("scheduled_messages").insert({
-          account_id: accountData.id,
+        const { error: insertError } = await supabase.from("master_scheduled_messages").insert({
           day_offset: dayOffset,
           hour: hour,
           message: messageText,

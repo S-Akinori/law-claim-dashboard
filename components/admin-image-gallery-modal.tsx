@@ -5,13 +5,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Search, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
 
 interface ImageFile {
   id: string
   url: string
-  description: string | null
+  name: string
+  account_id: string
   created_at: string
+}
+
+interface Account {
+  id: string
+  name: string
 }
 
 interface ImageGalleryModalProps {
@@ -20,8 +27,10 @@ interface ImageGalleryModalProps {
   onSelect: (imageUrl: string) => void
 }
 
-export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGalleryModalProps) {
+export function AdminImageGalleryModal({ open, onOpenChange, onSelect }: ImageGalleryModalProps) {
   const [images, setImages] = useState<ImageFile[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [selectedAccount, setSelectedAccount] = useState<string>("all")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -30,46 +39,52 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
 
   useEffect(() => {
     if (open) {
+      fetchAccounts()
       fetchImages()
     }
   }, [open])
+
+  useEffect(() => {
+    if (open) {
+      fetchImages()
+    }
+  }, [selectedAccount, open])
+
+  const fetchAccounts = async () => {
+    try {
+      const { data, error } = await supabase.from("accounts").select("id, name")
+
+      if (error) {
+        console.error("アカウント取得エラー:", error)
+        return
+      }
+
+      setAccounts(data || [])
+    } catch (err) {
+      console.error("アカウント取得エラー:", err)
+    }
+  }
 
   const fetchImages = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const { data: userData, error: userError } = await supabase.auth.getUser()
+      let query = supabase.from("images").select("*")
 
-      if (userError || !userData) {
-        console.error("ユーザー情報取得エラー:", userError)
-        setError("ユーザー情報の取得に失敗しました")
-        return
+      if (selectedAccount !== "all") {
+        query = query.eq("account_id", selectedAccount)
       }
 
-      // アカウント情報を取得
-      const { data: accountData, error: accountError } = await supabase.from("accounts").select("id").eq('user_id', userData.user.id).single()
+      const { data, error } = await query.order("created_at", { ascending: false })
 
-      if (accountError || !accountData) {
-        console.error("アカウント情報取得エラー:", accountError)
-        setError("アカウント情報の取得に失敗しました")
-        return
-      }
-
-      // imagesテーブルから画像情報を取得
-      const { data: imageData, error: imageError } = await supabase
-        .from("images")
-        .select("*")
-        .eq("account_id", accountData.id)
-        .order("created_at", { ascending: false })
-
-      if (imageError) {
-        console.error("画像データ取得エラー:", imageError)
+      if (error) {
+        console.error("画像データ取得エラー:", error)
         setError("画像データの取得に失敗しました")
         return
       }
 
-      setImages(imageData || [])
+      setImages(data || [])
     } catch (err) {
       console.error("画像一覧取得エラー:", err)
       setError("画像一覧の取得中にエラーが発生しました")
@@ -79,9 +94,12 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
   }
 
   // 検索クエリに基づいて画像をフィルタリング
-  const filteredImages = images.filter(
-    (image) => image.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false,
-  )
+  const filteredImages = images.filter((image) => image.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
+  const getAccountName = (accountId: string) => {
+    const account = accounts.find((acc) => acc.id === accountId)
+    return account ? account.name : "不明なアカウント"
+  }
 
   const handleSelect = () => {
     const selectedImage = images.find((img) => img.id === selectedImageId)
@@ -98,24 +116,41 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
           <DialogTitle>ギャラリーから画像を選択</DialogTitle>
         </DialogHeader>
 
-        <div className="relative w-full mb-4">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="画像を検索..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-0 top-0 h-9 w-9"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="画像を検索..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-9 w-9"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <div className="w-full sm:w-[200px]">
+            <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+              <SelectTrigger>
+                <SelectValue placeholder="アカウントを選択" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべてのアカウント</SelectItem>
+                {accounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -145,18 +180,19 @@ export function ImageGalleryModal({ open, onOpenChange, onSelect }: ImageGallery
                 >
                   <img
                     src={image.url || "/placeholder.svg"}
-                    alt={image.description || "画像"}
+                    alt={image.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = "/placeholder.svg?height=160&width=160"
                       e.currentTarget.alt = "イメージを読み込めませんでした"
                     }}
                   />
-                  {image.description && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-1 text-xs truncate">
-                      {image.description}
-                    </div>
-                  )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-1 text-xs truncate">
+                    {image.name}
+                  </div>
+                  <div className="absolute top-0 right-0 bg-black/60 text-white p-1 text-xs">
+                    {getAccountName(image.account_id)}
+                  </div>
                 </div>
               ))}
             </div>

@@ -19,7 +19,8 @@ export default async function Login({
 
   // すでにログインしている場合はダッシュボードにリダイレクト
   if (user) {
-    redirect("/dashboard")
+    const {data: adminUser} = await supabase.from("admin_users").select("*").eq("id", user.id).single()
+    return redirect(adminUser ? "/admin" : "/dashboard")
   }
 
   const redirectedFrom = searchParams.redirectedFrom || "/dashboard"
@@ -43,7 +44,7 @@ export default async function Login({
               <LoginFormWrapper redirectedFrom={redirectedFrom} serverError={error} />
             </Suspense>
           </CardContent>
-          <CardFooter className="flex justify-center">
+          {/* <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
               アカウントをお持ちでない場合は{" "}
               <Link href="/register" className="text-primary hover:underline">
@@ -51,7 +52,7 @@ export default async function Login({
               </Link>
               してください
             </p>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
       </div>
     </div>

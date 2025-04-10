@@ -63,14 +63,14 @@ export async function updateSession(request: NextRequest) {
         .eq('user_id', user.id)
         .single()
   
-      if (accountData?.use_master) {
-        const restrictedPaths = ['/dashboard/questions', '/dashboard/email-templates', '/dashboard/routes', '/dashboard/scheduled-messages', '/dashboard/triggers']
-        if (restrictedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
-          const url = request.nextUrl.clone()
-          url.pathname = '/dashboard'
-          return NextResponse.redirect(url)
-        }
-      }
+      // if (accountData?.use_master) {
+      //   const restrictedPaths = ['/dashboard/questions', '/dashboard/email-templates', '/dashboard/routes', '/dashboard/scheduled-messages', '/dashboard/triggers']
+      //   if (restrictedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+      //     const url = request.nextUrl.clone()
+      //     url.pathname = '/dashboard'
+      //     return NextResponse.redirect(url)
+      //   }
+      // }
     }
 
   }
