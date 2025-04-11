@@ -11,6 +11,8 @@ export default function CreateUserPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [company, setCompany] = useState("")
+  const [tel, setTel] = useState("")
+  const [hours, setHours] = useState("")
   const [lineChannelId, setLineChannelId] = useState("")
   const [lineChannelSecret, setLineChannelSecret] = useState("")
   const [lineChannelAccessToken, setLineChannelAccessToken] = useState("")
@@ -33,6 +35,8 @@ export default function CreateUserPage() {
           line_channel_id: lineChannelId,
           line_channel_secret: lineChannelSecret,
           line_channel_access_token: lineChannelAccessToken,
+          tel,
+          hours,
         },
       }),
     })
@@ -60,6 +64,14 @@ export default function CreateUserPage() {
         <div>
           <Label>会社名</Label>
           <Input value={company} onChange={(e) => setCompany(e.target.value)} required />
+        </div>
+        <div>
+          <Label>電話番号</Label>
+          <Input value={tel} onChange={(e) => setTel(e.target.value)} required />
+        </div>
+        <div>
+          <Label>営業時間</Label>
+          <Input value={hours} onChange={(e) => setHours(e.target.value)} required />
         </div>
         <div>
           <Label>LINE Channel ID</Label>

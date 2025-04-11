@@ -35,6 +35,8 @@ export async function POST(req: Request) {
     user_id: user.id,
     name: company,
     email: user.email,
+    tel: metadata.tel,
+    hours: metadata.hours,
     line_channel_id,
     line_channel_secret,
     line_channel_access_token,

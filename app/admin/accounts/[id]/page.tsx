@@ -58,6 +58,8 @@ export default function AccountDetailPage() {
       .update({
         name: account.name,
         email: account.email,
+        tel: account.tel,
+        hours: account.hours,
         line_channel_id: account.line_channel_id,
         line_channel_secret: account.line_channel_secret,
         line_channel_access_token: account.line_channel_access_token,
@@ -69,6 +71,8 @@ export default function AccountDetailPage() {
       setLoading(false)
       return
     }
+
+    router.push("/admin")
 
   }
 
@@ -99,6 +103,22 @@ export default function AccountDetailPage() {
             <Input
               value={account.email ?? ''}
               onChange={(e) => setAccount({ ...account, email: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <Label>電話番号</Label>
+            <Input
+              value={account.tel ?? ''}
+              onChange={(e) => setAccount({ ...account, tel: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <Label>営業時間</Label>
+            <Input
+              value={account.hours ?? ''}
+              onChange={(e) => setAccount({ ...account, hours: e.target.value })}
               required
             />
           </div>
