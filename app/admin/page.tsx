@@ -26,7 +26,7 @@ export default async function Dashboard() {
             {accountData && accountData.map((account) => (
               <li key={account.id} className="border-b py-4">
                 <p className="font-bold"><Link href={`/admin/accounts/${account.id}`}>{account.name}</Link></p>
-                <p>ユーザーID: {account.user_id}</p>
+                <p>ユーザーID: {account.id}</p>
               </li>
             ))}
           </ul>
