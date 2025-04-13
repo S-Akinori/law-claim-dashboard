@@ -24,7 +24,7 @@ export async function registerUser(prevState: any, formData: FormData) {
 
     const newAccountData = {
         user_id: user.id,
-        name: formData.get("company")?.toString() || "",
+        name: formData.get("name")?.toString() || "",
         email: user.email,
         line_channel_id: formData.get("line_channel_id")?.toString() || "",
         line_channel_secret: formData.get("line_channel_secret")?.toString() || "",
