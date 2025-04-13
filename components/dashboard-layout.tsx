@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Image,
 } from "lucide-react"
+import LogoutButton from "./logout-button"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -13,20 +14,31 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const routes = [
+    // {
+    //   href: "/dashboard/account",
+    //   label: "アカウント管理",
+    //   icon: <MessageSquare className="h-5 w-5" />,
+    // },
     {
-      href: "/dashboard/images",
-      label: "画像管理",
-      icon: <Image className="h-5 w-5" />,
+      href: "/dashboard/line-users",
+      label: "ユーザリスト",
+      icon: <MessageSquare className="h-5 w-5" />,
     },
+    // {
+    //   href: "/dashboard/images",
+    //   label: "画像管理",
+    //   icon: <Image className="h-5 w-5" />,
+    // },
   ]
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Link href="/admin" className="flex items-center gap-2 font-semibold">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b bg-background px-4 md:px-6">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <MessageSquare className="h-6 w-6" />
           <span className="hidden md:inline-block">交通事故慰謝料計算</span>
         </Link>
+        <LogoutButton />
       </header>
       <div className="flex flex-1">
         <aside className="hidden w-64 border-r bg-muted/40 md:block">

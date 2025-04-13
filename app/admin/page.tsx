@@ -21,12 +21,13 @@ export default async function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight">ダッシュボード</h1>
           <p className="text-muted-foreground">LINE Bot管理システムの概要を確認できます</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
+        <div className="grid grid-cols-1 gap-6 pt-12">
           <ul>
             {accountData && accountData.map((account) => (
               <li key={account.id} className="border-b py-4">
                 <p className="font-bold"><Link href={`/admin/accounts/${account.id}`}>{account.name}</Link></p>
-                <p>ユーザーID: {account.id}</p>
+                <p>アカウントID: {account.id}</p>
+                <p>WebHook: https://law-claim.consolation-money-bot.com?account_id={account.id}</p>
               </li>
             ))}
           </ul>

@@ -19,7 +19,6 @@ export function MasterImageGalleryModal({ open, onOpenChange, onSelect, account 
   const [images, setImages] = useState<Tables<'images'>[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
   const supabase = createClient()
 
@@ -55,11 +54,6 @@ export function MasterImageGalleryModal({ open, onOpenChange, onSelect, account 
       setLoading(false)
     }
   }
-
-  // 検索クエリに基づいて画像をフィルタリング
-  const filteredImages = images.filter(
-    (image) => image.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false,
-  )
 
   const handleSelect = () => {
     if (selectedImageId) {
@@ -127,26 +121,6 @@ export function MasterImageGalleryModal({ open, onOpenChange, onSelect, account 
           <DialogTitle>ギャラリーから画像を選択</DialogTitle>
         </DialogHeader>
 
-        <div className="relative w-full mb-4">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="画像を検索..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-0 top-0 h-9 w-9"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <p>画像を追加</p>
           <Input id="picture" type="file" onChange={handleFileChange} />
@@ -159,15 +133,13 @@ export function MasterImageGalleryModal({ open, onOpenChange, onSelect, account 
             </div>
           ) : error ? (
             <div className="text-destructive p-4">{error}</div>
-          ) : filteredImages.length === 0 ? (
+          ) : images.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-muted-foreground">
-                {searchQuery ? "検索条件に一致する画像がありません" : "アップロードされた画像がありません"}
-              </p>
+              <p className="text-muted-foreground">アップロードされた画像がありません</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-1">
-              {filteredImages.map((image) => (
+              {images.map((image) => (
                 <div
                   key={image.id}
                   className={`

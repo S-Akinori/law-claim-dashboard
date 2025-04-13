@@ -284,12 +284,12 @@ export default function RoutesPage() {
             <p className="text-muted-foreground">質問の順序と条件分岐を設定します</p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
+            {/* <Button asChild variant="outline">
               <Link href="/admin/routes/flow">
                 <ArrowRight className="mr-2 h-4 w-4" />
                 フロー表示
               </Link>
-            </Button>
+            </Button> */}
             <Button onClick={() => handleOpenRouteDialog()}>
               <Plus className="mr-2 h-4 w-4" />
               新規ルート
