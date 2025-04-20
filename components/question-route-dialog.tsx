@@ -10,41 +10,15 @@ import { Plus, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { v4 as uuidv4 } from "uuid" // UUIDを生成するライブラリを追加する必要があります
+import { Tables } from "@/database.types"
 
-interface Question {
-  id: string
-  title: string
-  text: string
-  type: string
-}
-
-interface Option {
-  id: string
-  question_id: string
-  text: string
-}
-
-interface Condition {
-  id?: string
-  question_id: string
-  required_question_id: string
-  required_option_id: string | null
-  operator: string
-  value: string | null
-  condition_group: string
-  isNew?: boolean
-  isDeleted?: boolean
-}
-
-interface QuestionRoute {
-  id: string
-  from_question_id: string
-  next_question_id: string
-  condition_group: string
-  conditions?: Condition[]
-}
+type Question = Tables<"questions">
+type Option = Tables<"options">
+type Condition = Tables<"conditions">
+type QuestionRoute = Tables<"question_routes">
 
 interface QuestionRouteDialogProps {
+  accountId: string
   open: boolean
   onOpenChange: (open: boolean) => void
   questions: Question[]
@@ -54,6 +28,7 @@ interface QuestionRouteDialogProps {
 }
 
 export function QuestionRouteDialog({
+  accountId,
   open,
   onOpenChange,
   questions,
@@ -95,11 +70,6 @@ export function QuestionRouteDialog({
 
   const handleAddCondition = () => {
     if (!fromQuestionId) {
-      toast({
-        variant: "destructive",
-        title: "エラー",
-        description: "最初に質問を選択してください",
-      })
       return
     }
 
@@ -129,6 +99,8 @@ export function QuestionRouteDialog({
 
     setConditions(newConditions)
   }
+
+  console.log(options)
 
   const handleConditionChange = (
     index: number,
@@ -160,15 +132,6 @@ export function QuestionRouteDialog({
 
       setLoading(true)
       setError(null)
-
-      // アカウント情報を取得
-      const { data: accountData, error: accountError } = await supabase.from("accounts").select("id").single()
-
-      if (accountError || !accountData) {
-        console.error("アカウント情報取得エラー:", accountError)
-        setError("アカウント情報の取得に失敗しました")
-        return
-      }
 
       if (isEdit && route) {
         // 既存のルートを更新
@@ -223,7 +186,7 @@ export function QuestionRouteDialog({
         const conditionsToAdd = conditions.filter((c) => c.isNew && !c.isDeleted)
         if (conditionsToAdd.length > 0) {
           const conditionsToInsert = conditionsToAdd.map((condition) => ({
-            account_id: accountData.id,
+            account_id: accountId,
             question_id: fromQuestionId,
             required_question_id: condition.required_question_id,
             required_option_id: condition.required_option_id,
@@ -245,7 +208,7 @@ export function QuestionRouteDialog({
         const { data: newRoute, error: insertRouteError } = await supabase
           .from("question_routes")
           .insert({
-            account_id: accountData.id,
+            account_id: accountId,
             from_question_id: fromQuestionId,
             next_question_id: nextQuestionId,
             condition_group: conditionGroup,
@@ -266,7 +229,7 @@ export function QuestionRouteDialog({
 
         if (validConditions.length > 0) {
           const conditionsToInsert = validConditions.map((condition) => ({
-            account_id: accountData.id,
+            account_id: accountId,
             question_id: fromQuestionId,
             required_question_id: condition.required_question_id,
             required_option_id: condition.required_option_id,
@@ -430,7 +393,7 @@ export function QuestionRouteDialog({
                                             {option.text}
                                           </SelectItem>
                                         )) || (
-                                          <SelectItem value="" disabled>
+                                          <SelectItem value="none" disabled>
                                             選択肢がありません
                                           </SelectItem>
                                         )}

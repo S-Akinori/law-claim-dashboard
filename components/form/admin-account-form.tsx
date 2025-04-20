@@ -19,7 +19,7 @@ export default function AdminAccountForm({ accountData }: Props) {
         message: '',
     }
     const [state, formAction, pending] = useActionState(accountData ? updateAccount : registerUser, initialState)
-    console.log(initialState)
+
     return (
         <form action={formAction} className="space-y-4">
             <div>

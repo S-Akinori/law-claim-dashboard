@@ -25,9 +25,9 @@ export default async function Dashboard() {
           <ul>
             {accountData && accountData.map((account) => (
               <li key={account.id} className="border-b py-4">
-                <p className="font-bold"><Link href={`/admin/accounts/${account.id}`}>{account.name}</Link></p>
-                <p>アカウントID: {account.id}</p>
-                <p>WebHook: https://law-claim.consolation-money-bot.com/callback?account_id={account.id}</p>
+                <p className="font-bold mb-4"><Link href={`/admin/accounts/${account.id}`}>{account.name}</Link></p>
+                <p className="mb-4">アカウントID: <br />{account.id}</p>
+                <p>WebHook: <br />https://law-claim.consolation-money-bot.com/callback?account_id={account.id}</p>
               </li>
             ))}
           </ul>

@@ -6,6 +6,7 @@ import {
   Image,
 } from "lucide-react"
 import LogoutButton from "./logout-button"
+import { createClient } from "@/lib/supabase/server"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -13,7 +14,33 @@ interface DashboardLayoutProps {
 
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
 
-  const routes = [
+  const supabase = await createClient()
+
+  const { data: user, error: userError } = await supabase.auth.getUser()
+  if (userError) {
+    console.error("User error:", userError)
+  }
+  if (!user) {
+    console.error("User not found")
+    return <p>User not found</p>
+  }
+  if (!user.user) {
+    console.error("User not found")
+    return <p>User not found</p>
+  }
+  const { data: accountData, error: accountError } = await supabase
+    .from("accounts")
+    .select("*")
+    .eq("user_id", user.user.id)
+    .single()
+
+  const routes = accountData?.use_master ? [
+    {
+      href: "/dashboard/line-users",
+      label: "ユーザリスト",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
+  ] : [
     // {
     //   href: "/dashboard/account",
     //   label: "アカウント管理",
@@ -24,6 +51,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       label: "ユーザリスト",
       icon: <MessageSquare className="h-5 w-5" />,
     },
+    // {
+    //   href: "/dashboard/questions",
+    //   label: "質問管理",
+    //   icon: <MessageSquare className="h-5 w-5" />,
+    // },
     // {
     //   href: "/dashboard/images",
     //   label: "画像管理",

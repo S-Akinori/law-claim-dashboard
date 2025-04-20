@@ -26,13 +26,14 @@ interface Question {
 }
 
 interface EmailTemplateDialogProps {
+  accountId: string
   open: boolean
   onOpenChange: (open: boolean) => void
   template: EmailTemplate | null
   onSubmit: () => void
 }
 
-export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: EmailTemplateDialogProps) {
+export function EmailTemplateDialog({ open, onOpenChange, accountId, template, onSubmit }: EmailTemplateDialogProps) {
   const [subject, setSubject] = useState("")
   const [body, setBody] = useState("")
   const [loading, setLoading] = useState(false)
@@ -68,6 +69,7 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
       const { data, error } = await supabase
         .from("questions")
         .select("id, title, text, type")
+        .eq("account_id", accountId)
         .order("created_at", { ascending: true })
 
       if (error) {
@@ -85,10 +87,6 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
 
   const handleCopyQuestionId = (id: string) => {
     navigator.clipboard.writeText(`{answer:${id}}`)
-    toast({
-      title: "コピーしました",
-      description: "質問IDをコピーしました。テンプレートに貼り付けてください。",
-    })
   }
 
   const handleSubmit = async () => {
@@ -101,14 +99,6 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
       setLoading(true)
       setError(null)
 
-      // アカウント情報を取得
-      const { data: accountData, error: accountError } = await supabase.from("accounts").select("id").single()
-
-      if (accountError || !accountData) {
-        console.error("アカウント情報取得エラー:", accountError)
-        setError("アカウント情報の取得に失敗しました")
-        return
-      }
 
       if (isEdit && template) {
         // 既存のテンプレートを更新
@@ -126,14 +116,10 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
           return
         }
 
-        toast({
-          title: "テンプレートを更新しました",
-          description: "テンプレートが正常に更新されました",
-        })
       } else {
         // 新規テンプレートを作成
         const { error: insertError } = await supabase.from("email_templates").insert({
-          account_id: accountData.id,
+          account_id: accountId,
           subject,
           body,
         })
@@ -143,11 +129,6 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
           setError("テンプレートの作成に失敗しました")
           return
         }
-
-        toast({
-          title: "テンプレートを作成しました",
-          description: "テンプレートが正常に作成されました",
-        })
       }
 
       onSubmit()

@@ -15,7 +15,7 @@ export default async function LineUser({ params }: { params: { id: string } }) {
         .select("id")
         .eq("user_id", authData.user.id)
         .single()
-    
+
     if (!accountData || accountError) {
         console.error("アカウント情報取得エラー:", accountError)
         return <p>アカウント情報取得エラー: {accountError.message}</p>
@@ -32,6 +32,24 @@ export default async function LineUser({ params }: { params: { id: string } }) {
         console.error("ユーザー情報取得エラー:", userError)
         return <p>ユーザー情報取得エラー: {userError?.message}</p>
     }
+
+    const { data: routesData, error: routesError } = await supabase
+        .from("master_question_routes")
+        .select("from_master_question_id, next_master_question_id")
+
+    const { data: triggers } = await supabase
+        .from("master_start_triggers")
+        .select("master_question_id")
+        .order("created_at", { ascending: true })
+
+    const startIds = triggers?.map(t => t.master_question_id) || []
+
+
+    const sortedResponses = sortResponsesByRouteMultiple(
+        userData.user_responses,
+        routesData, // 予め Supabase から取得したルートデータ
+        startIds
+    );
 
     return (
         <div className="space-y-6">
@@ -60,7 +78,7 @@ export default async function LineUser({ params }: { params: { id: string } }) {
                         <p>質問の回答結果が見つかりません</p>
                     ) : (
                         <ul>
-                            {userData.user_responses.map((response) => (
+                            {sortedResponses.map((response) => (
                                 <li key={response.id} className="border-b py-2">
                                     <p>質問: {response.master_questions?.title}</p>
                                     <p>回答: {response.response}</p>
@@ -73,3 +91,31 @@ export default async function LineUser({ params }: { params: { id: string } }) {
         </div>
     )
 }
+
+function sortResponsesByRouteMultiple(
+    responses: any[],
+    questionRoutes: { from_master_question_id: string, next_master_question_id: string }[],
+    startIds: string[]
+  ): any[] {
+    const responseMap = new Map(responses.map((r) => [r.master_question_id, r]));
+    const visited = new Set<string>();
+    const sorted: any[] = [];
+  
+    for (const startId of startIds) {
+      let currentId = startId;
+  
+      while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const res = responseMap.get(currentId);
+        if (res) sorted.push(res);
+  
+        const next = questionRoutes.find((r) => r.from_master_question_id === currentId);
+        if (!next) break;
+  
+        currentId = next.next_master_question_id;
+      }
+    }
+  
+    return sorted;
+  }
+  
