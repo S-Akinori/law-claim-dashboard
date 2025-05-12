@@ -25,7 +25,6 @@ export async function copyMasterData(prevState: any, formData: FormData) {
         else redirect('/admin')
     }
 
-
     // 1. master_questions -> questions
     const { data: masterQuestions } = await supabase.from('master_questions').select('*')
     const insertedQuestions = await supabase.from('questions').insert(
@@ -34,6 +33,7 @@ export async function copyMasterData(prevState: any, formData: FormData) {
             text: q.text,
             type: q.type,
             title: q.title,
+            key: q.key,
         })) || []
     ).select('id')
 
@@ -42,13 +42,18 @@ export async function copyMasterData(prevState: any, formData: FormData) {
         questionIdMap[q.id] = insertedQuestions.data?.[idx]?.id
     })
 
+    const {data: optionImages} = await supabase
+        .from('option_images')
+        .select('*, images(*)')
+        .eq('account_id', accountId)
+
     // 2. master_options -> options
     const { data: masterOptions } = await supabase.from('master_options').select('*')
     const insertedOptions = await supabase.from('options').insert(
         masterOptions?.map(o => ({
             question_id: questionIdMap[o.master_question_id],
             text: o.text,
-            image_url: o.image_url,
+            image_url: optionImages?.find((img) => img.master_option_id === o.id)?.images?.url || null,
         })) || []
     ).select('id')
 
@@ -123,6 +128,16 @@ export async function copyMasterData(prevState: any, formData: FormData) {
     }).eq('id', accountId).select('*')
 
     if (error) return { message: `accounts update error: ${error.message}` }
-    else redirect('/admin')
+    else redirect(`/admin/accounts/${accountId}`)
+    // // 8. master_actions -> actions
+    // const { data: masterActions } = await supabase.from('master_actions').select('*')
+    // const actionInserts = masterActions?.map(a => ({
+    //     account_id: accountId,
+    //     type: a.type,
+    //     next_question_id: questionIdMap[a.next_master_question_id],
+    //     email_template_id: a.master_email_template_id ? insertedEmails.data?.find(e => e.subject === a.master_email_template_id)?.id : null,
+    // })) || []
+    // const insertedActions = await supabase.from('actions').insert(actionInserts)
+    // if (insertedActions.error) return { message: `actions insert error: ${insertedActions.error.message}` }
     
 }

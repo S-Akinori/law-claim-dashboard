@@ -1,4 +1,6 @@
+import DeleteEmailTemplateForm from "@/components/form/delete-email-templates-form"
 import DeleteStartTriggerForm from "@/components/form/delete-start-triggers-form"
+import EmailTemplatesForm from "@/components/form/email-templates-form"
 import StartTriggerForm from "@/components/form/start-triggers-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,23 +9,23 @@ import { createClient } from "@/lib/supabase/server"
 import { Trash2 } from "lucide-react"
 import { notFound } from "next/navigation"
 
-interface EditTriggerPageProps {
+interface EditEmailTemplatesPageProps {
     params: {
         id: string
-        triggerId: string
+        templateId: string
     }
 }
 
-export default async function EditTriggerPage({ params }: EditTriggerPageProps) {
-    const { id: accountId, triggerId } = params
+export default async function EditEmailTemplatesPage({ params }: EditEmailTemplatesPageProps) {
+    const { id: accountId, templateId } = params
     const supabase = await createClient()
-    const { data: triggerData, error: triggerError } = await supabase
-        .from("start_triggers")
+    const { data: emailTemplateData, error: triggerError } = await supabase
+        .from("email_templates")
         .select("*")
-        .eq("id", triggerId)
+        .eq("id", templateId)
         .single()
 
-    if (triggerError || !triggerData) {
+    if (triggerError || !emailTemplateData) {
         console.error("トリガー情報取得エラー:", triggerError)
         notFound()
     }
@@ -39,7 +41,7 @@ export default async function EditTriggerPage({ params }: EditTriggerPageProps) 
         <>
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">スタートトリガー編集</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">メールテンプレート編集</h1>
                     <p className="text-muted-foreground">特定のキーワードで開始する質問を編集します</p>
                 </div>
                 <Dialog>
@@ -57,17 +59,17 @@ export default async function EditTriggerPage({ params }: EditTriggerPageProps) 
                                     キャンセル
                                 </Button>
                             </DialogClose>
-                            <DeleteStartTriggerForm triggerId={triggerData.id} />
+                            <DeleteEmailTemplateForm templateId={emailTemplateData.id} />
                         </div>
                     </DialogContent>
                 </Dialog>
                 <Card>
                     <CardHeader>
-                        <CardTitle>トリガー情報</CardTitle>
-                        <CardDescription>トリガーの詳細を編集します</CardDescription>
+                        <CardTitle>メールテンプレート情報</CardTitle>
+                        <CardDescription>メールテンプレートの詳細を編集します</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <StartTriggerForm accountId={accountId} triggerData={triggerData} questionsData={questionsData} />
+                        <EmailTemplatesForm accountId={accountId} emailTemplateData={emailTemplateData} questionsData={questionsData} />
                     </CardContent>
                 </Card>
             </div>

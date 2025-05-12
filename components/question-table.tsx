@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Tables } from "@/database.types";
 
 interface QuestionTableProps {
-    questionsData: Tables<'questions'>[];
+    questionsData: Tables<'account_questions'>[];
 }
 
 const QuestionTable = ({ questionsData }: QuestionTableProps) => {

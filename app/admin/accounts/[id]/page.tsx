@@ -36,6 +36,11 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
       icon: <MessageSquare className="h-5 w-5" />,
     },
     {
+      href: `/admin/accounts/${id}/actions`,
+      label: "アクション管理",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
+    {
       href: `/admin/accounts/${id}/routes`,
       label: "質問ルート",
       icon: <ArrowRight className="h-5 w-5" />,

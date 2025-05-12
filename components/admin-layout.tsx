@@ -44,6 +44,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       icon: <MessageSquare className="h-5 w-5" />,
     },
     {
+      href: "/admin/question-behavior",
+      label: "アクション設定",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
+    {
       href: "/admin/routes",
       label: "質問ルート",
       icon: <ArrowRight className="h-5 w-5" />,
@@ -77,6 +82,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       <div className="flex flex-1">
         <aside className="hidden w-64 border-r bg-muted/40 md:block">
           <nav className="grid gap-2 p-4">
+            <p className="font-bold">マスタ編集</p>
             {routes.map((route) => (
               <Link
                 key={route.href}

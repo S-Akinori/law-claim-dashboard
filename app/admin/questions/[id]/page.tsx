@@ -160,11 +160,6 @@ export default function EditQuestionPage() {
 
       if (userError || !userData.user) {
         console.error("ユーザー情報取得エラー:", userError)
-        toast({
-          variant: "destructive",
-          title: "エラーが発生しました",
-          description: "ユーザー情報の取得に失敗しました",
-        })
         return
       }
 
@@ -181,11 +176,6 @@ export default function EditQuestionPage() {
 
       if (uploadError) {
         console.error("画像アップロードエラー:", uploadError)
-        toast({
-          variant: "destructive",
-          title: "エラーが発生しました",
-          description: "画像のアップロードに失敗しました",
-        })
         return
       }
 
@@ -207,11 +197,7 @@ export default function EditQuestionPage() {
 
       if (insertError) {
         console.error("画像データ挿入エラー:", insertError)
-        toast({
-          variant: "destructive",
-          title: "エラーが発生しました",
-          description: "画像データの保存に失敗しました",
-        })
+
       }
 
       // 選択肢の画像URLを更新
@@ -219,17 +205,9 @@ export default function EditQuestionPage() {
       newOptions[index].image_url = publicURL.publicUrl
       setQuestion({ ...question, options: newOptions })
 
-      toast({
-        title: "画像をアップロードしました",
-        description: "画像が正常にアップロードされました",
-      })
     } catch (err) {
       console.error("画像アップロードエラー:", err)
-      toast({
-        variant: "destructive",
-        title: "エラーが発生しました",
-        description: "画像のアップロード中にエラーが発生しました",
-      })
+
     }
   }
 
@@ -307,6 +285,8 @@ export default function EditQuestionPage() {
 
       // 既存の選択肢を更新
       const optionsToUpdate = question.options.filter((option) => option.id && !option.isNew && !option.isDeleted)
+
+      console.log("更新する選択肢:", optionsToUpdate) // デバッグ用
 
       for (const option of optionsToUpdate) {
         const { error: updateOptionError } = await supabase

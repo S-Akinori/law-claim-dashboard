@@ -28,7 +28,7 @@ export default async function ScheduledMessagesPage({ params }: ScheduledMessage
     .from("scheduled_messages")
     .select("*")
     .eq("account_id", id)
-    .order("created_at", { ascending: false })
+    .order("day_offset", { ascending: false })
 
   if (messagesError) {
     console.error("定期メッセージ取得エラー:", messagesError)

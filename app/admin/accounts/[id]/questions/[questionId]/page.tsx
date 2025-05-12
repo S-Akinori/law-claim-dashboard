@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { ImageGalleryModal } from "@/components/image-gallery-modal"
+import { Tables } from "@/database.types"
 
 // Optionインターフェースに画像URLを追加
 interface Option {
@@ -39,6 +40,7 @@ export default function EditQuestionPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [account, setAccount] = useState<Tables<'accounts'>>(null) // アカウント情報を格納するための状態
     const router = useRouter()
     const params = useParams()
     const accountId = params.id as string
@@ -87,6 +89,24 @@ export default function EditQuestionPage() {
                 ...questionData,
                 options: optionsData || [],
             })
+
+            // アカウント情報を取得
+            const { data: accountData, error: accountError } = await supabase
+                .from("accounts")
+                .select("*")
+                .eq("id", accountId)
+                .single()
+            if (accountError) {
+                console.error("アカウントデータ取得エラー:", accountError)
+                setError("アカウントデータの取得に失敗しました")
+                return
+            }
+            if (!accountData) {
+                console.error("アカウントデータが見つかりません")
+                setError("アカウントデータが見つかりません")
+                return
+            }
+            setAccount(accountData)
         } catch (err) {
             console.error("データ取得エラー:", err)
             setError("データの取得中にエラーが発生しました")
@@ -224,7 +244,23 @@ export default function EditQuestionPage() {
     }
 
     // ギャラリーで選択した画像を設定する処理
-    const handleSelectImage = (imageUrl: string) => {
+    const handleSelectImage = async (imageId: string) => {
+        const fetchImageUrl = async (imageId: string) => {
+            const { data: imageData, error } = await supabase
+                .from("images")
+                .select("url")
+                .eq("id", imageId)
+                .single();
+
+            if (error) {
+                console.error("画像URL取得エラー:", error);
+                return "";
+            }
+
+            return imageData?.url || "";
+        };
+
+        const imageUrl = await fetchImageUrl(imageId);
         if (currentOptionIndex !== null && question) {
             const newOptions = [...question.options]
             newOptions[currentOptionIndex].image_url = imageUrl
@@ -494,7 +530,7 @@ export default function EditQuestionPage() {
             </div>
 
             {/* 画像ギャラリーモーダル */}
-            <ImageGalleryModal open={galleryOpen} onOpenChange={setGalleryOpen} onSelect={handleSelectImage} />
+            <ImageGalleryModal open={galleryOpen} onOpenChange={setGalleryOpen} onSelect={handleSelectImage} account={account} />
         </>
     )
 }

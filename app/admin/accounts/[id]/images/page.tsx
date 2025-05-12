@@ -31,6 +31,7 @@ export default async function AccountImagesPage({ params }: PageProps) {
         .eq("account_id", accountData.id)
         .order("created_at", { ascending: true })
 
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">

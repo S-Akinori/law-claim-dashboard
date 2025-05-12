@@ -45,6 +45,9 @@ export async function registerUser(prevState: any, formData: FormData) {
 
 export async function updateAccount(prevState: any, formData: FormData) {
     const supabase = await createClient()
+
+    const sub_emails = formData.get("sub_emails")?.toString().split("\n") || []
+    const cleanedSubEmails = sub_emails.map(email => email.trim()).filter(email => email !== "");
   
     const updatedData = {
       name: formData.get("name")?.toString() || undefined,
@@ -53,11 +56,9 @@ export async function updateAccount(prevState: any, formData: FormData) {
       line_channel_access_token: formData.get("line_channel_access_token")?.toString() || undefined,
       tel: formData.get("tel")?.toString() || undefined,
       hours: formData.get("hours")?.toString() || undefined,
+      sub_emails: cleanedSubEmails,
     }
 
-    console.log(updatedData)
-
-    console.log(prevState.user_id)
   
     const { error } = await supabase
       .from("accounts")

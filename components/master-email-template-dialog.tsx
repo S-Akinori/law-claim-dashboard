@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { CopyIcon } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 interface EmailTemplate {
   id: string
@@ -101,7 +102,7 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
       setLoading(true)
       setError(null)
 
-      
+
       // ユーザー情報を取得
       const { data: userData, error: userError } = await supabase.auth.getUser()
 
@@ -167,6 +168,7 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSubmit }: 
       setLoading(false)
     }
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

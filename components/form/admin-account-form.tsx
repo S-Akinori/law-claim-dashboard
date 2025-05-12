@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { use, useActionState } from "react"
 import { registerUser, updateAccount } from "@/app/actions/admin/accounts"
 import { Tables } from "@/database.types"
+import { Textarea } from "../ui/textarea"
 
 interface Props {
     accountData?: Tables<'accounts'>
@@ -56,6 +57,12 @@ export default function AdminAccountForm({ accountData }: Props) {
                 <Label>LINE Channel Access Token</Label>
                 <Input name="line_channel_access_token" required defaultValue={accountData?.line_channel_access_token ?? ''} />
             </div>
+            {accountData && (
+                <div>
+                    <Label>通知用メール（改行で複数追加）</Label>
+                    <Textarea name="sub_emails" rows={3} defaultValue={accountData?.sub_emails.join('\n') ?? ''} />
+                </div>
+            )}
             {state?.message && (
                 <div className="text-red-500">
                     {state.message}
