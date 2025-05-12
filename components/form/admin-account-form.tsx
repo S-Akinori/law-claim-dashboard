@@ -64,7 +64,7 @@ export default function AdminAccountForm({ accountData }: Props) {
             {accountData && (
                 <div>
                     <Label>通知用メール（改行で複数追加）</Label>
-                    <Textarea name="sub_emails" rows={3} defaultValue={accountData?.sub_emails.join('\n') ?? ''} />
+                    <Textarea name="sub_emails" rows={3} defaultValue={accountData?.sub_emails?.join('\n') ?? ''} />
                 </div>
             )}
             {state?.message && (
