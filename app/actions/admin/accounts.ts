@@ -31,6 +31,7 @@ export async function registerUser(prevState: any, formData: FormData) {
         line_channel_access_token: formData.get("line_channel_access_token")?.toString() || "",
         tel: formData.get("tel")?.toString() || "",
         hours: formData.get("hours")?.toString() || "",
+        sheet_id: formData.get("sheet_id")?.toString() || "",
     }
     // accounts テーブルに登録
     const { error: insertError } = await supabaseAdmin.from("accounts").insert(newAccountData)
@@ -57,6 +58,7 @@ export async function updateAccount(prevState: any, formData: FormData) {
       tel: formData.get("tel")?.toString() || undefined,
       hours: formData.get("hours")?.toString() || undefined,
       sub_emails: cleanedSubEmails,
+      sheet_id: formData.get("sheet_id")?.toString() || undefined,
     }
 
   

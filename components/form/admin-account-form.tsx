@@ -57,6 +57,10 @@ export default function AdminAccountForm({ accountData }: Props) {
                 <Label>LINE Channel Access Token</Label>
                 <Input name="line_channel_access_token" required defaultValue={accountData?.line_channel_access_token ?? ''} />
             </div>
+            <div>
+                <Label>スプレッドシートID</Label>
+                <Input name="sheet_id" required defaultValue={accountData?.sheet_id ?? ''} />
+            </div>
             {accountData && (
                 <div>
                     <Label>通知用メール（改行で複数追加）</Label>
