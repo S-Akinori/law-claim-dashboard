@@ -13,9 +13,9 @@ interface TriggersPageProps {
     id: string
   }
 }
-export default async function TriggersPage( { params }: TriggersPageProps) {
+export default async function TriggersPage({ params }: TriggersPageProps) {
   const { id: accountId } = params
-  
+
   const supabase = await createClient()
   const { data: questions } = await supabase.from("questions").select(`*`).eq('account_id', accountId).order("created_at", { ascending: false })
   const { data: emailTemplates } = await supabase.from("email_templates").select(`*`).eq('account_id', accountId).order("created_at", { ascending: false })
@@ -23,13 +23,15 @@ export default async function TriggersPage( { params }: TriggersPageProps) {
 
   return (
     <>
-    <div className="space-y-6">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>アクション設定</CardTitle>
           </CardHeader>
           <CardContent>
-            <AccountBehaviorForm accountId={accountId} questions={questions} emailTemplates={emailTemplates} actions={actions} />
+            {questions && emailTemplates && actions && (
+              <AccountBehaviorForm accountId={accountId} questions={questions} emailTemplates={emailTemplates} actions={actions} />
+            )}
           </CardContent>
         </Card>
       </div>

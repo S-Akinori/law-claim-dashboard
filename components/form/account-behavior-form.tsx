@@ -24,6 +24,7 @@ export default function AccountBehaviorForm({accountId, questions, emailTemplate
     const [calculationQuestionId, setCalculationQuestionId] = useState(actions?.find((action) => action.type === "calculation")?.next_question_id || "")
     const [completionQuestionId, setCompletionQuestionId] = useState(actions?.find((action) => action.type === "complete_notification")?.next_question_id || "")
     const [emailTemplateId, setEmailTemplateId] = useState(actions?.find((action) => action.type === "complete_notification")?.email_template_id || "")
+    const [emailTemplateId2, setEmailTemplateId2] = useState(actions.find((action) => action.type === "incomplete_notification")?.email_template_id || "")
     const [loading, setLoading] = useState(false)
 
     console.log(calculationQuestionId, completionQuestionId, emailTemplateId)
@@ -32,6 +33,7 @@ export default function AccountBehaviorForm({accountId, questions, emailTemplate
         setLoading(true)
         const calculationActionId = actions?.find((action) => action.type === "calculation")?.id
         const completionActionId = actions?.find((action) => action.type === "complete_notification")?.id
+        const incompleteActionId = actions.find((action) => action.type === "incomplete_notification")?.id
 
         if(!calculationActionId) {
             await supabase.from("actions").insert({
@@ -59,6 +61,20 @@ export default function AccountBehaviorForm({accountId, questions, emailTemplate
                 next_question_id: completionQuestionId,
                 email_template_id: emailTemplateId,
             }).eq("id", completionActionId)
+        }
+
+        if(!incompleteActionId) {
+            await supabase.from("actions").insert({
+                account_id: accountId,
+                type: "incomplete_notification",
+                next_question_id: null,
+                email_template_id: emailTemplateId2,
+            })
+        } else {
+            await supabase.from("actions").update({
+                next_question_id: null,
+                email_template_id: emailTemplateId2,
+            }).eq("id", incompleteActionId)
         }
         setLoading(false)
     }
@@ -101,6 +117,22 @@ export default function AccountBehaviorForm({accountId, questions, emailTemplate
                     <Label>送信するメール</Label>
                     <Select name="email_template" defaultValue={emailTemplateId} onValueChange={setEmailTemplateId}>
                         <SelectTrigger id="email_template">
+                            <SelectValue placeholder="選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {emailTemplates.map((temp) => (
+                                <SelectItem key={temp.id} value={temp.id}>
+                                    {temp.subject}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="mb-4">
+                    <p>未完了通知設定</p>
+                    <Label>管理者に送信するメール</Label>
+                    <Select name="email_template2" defaultValue={emailTemplateId2} onValueChange={setEmailTemplateId2}>
+                        <SelectTrigger id="email_template2">
                             <SelectValue placeholder="選択" />
                         </SelectTrigger>
                         <SelectContent>
