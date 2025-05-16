@@ -1,10 +1,5 @@
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import Link from "next/link"
 import BehaviorForm from "@/components/form/behavior-form"
 
 export default async function TriggersPage() {
@@ -15,13 +10,15 @@ export default async function TriggersPage() {
 
   return (
     <>
-    <div className="space-y-6">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>アクション設定</CardTitle>
           </CardHeader>
           <CardContent>
-            <BehaviorForm questions={questions} emailTemplates={emailTemplates} actions={actions} />
+            {questions && emailTemplates && actions && (
+              <BehaviorForm questions={questions} emailTemplates={emailTemplates} actions={actions} />
+            )}
           </CardContent>
         </Card>
       </div>

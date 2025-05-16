@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { ImageGalleryModal } from "@/components/image-gallery-modal"
+import { Tables } from "@/database.types"
 
 // Optionインターフェースに画像URLを追加
 interface Option {
@@ -33,10 +34,16 @@ interface Question {
   type: string
   account_id: string
   options: Option[]
+  master_validations: Tables<"master_validations">[]
 }
 
 export default function EditQuestionPage() {
   const [question, setQuestion] = useState<Question | null>(null)
+  const [validation, setValidation] = useState<Tables<"master_validations"> | null>(null)
+  const [type, setType] = useState("")
+  const [value, setValue] = useState("")
+  const [message, setMessage] = useState("")
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,6 +61,8 @@ export default function EditQuestionPage() {
     fetchQuestion()
   }, [questionId])
 
+  console.log("question", question) // デバッグ用
+
   const fetchQuestion = async () => {
     try {
       setLoading(true)
@@ -62,7 +71,7 @@ export default function EditQuestionPage() {
       // 質問データを取得
       const { data: questionData, error: questionError } = await supabase
         .from("master_questions")
-        .select("*")
+        .select("*, master_validations(*)")
         .eq("id", questionId)
         .single()
 
@@ -372,6 +381,27 @@ export default function EditQuestionPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* {question.type === "text" && (
+                  <div>
+                    <Label>バリデーションタイプ:</Label>
+                      <Select value={type} onValueChange={setType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="バリデーションタイプを選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="number">数値のみ</SelectItem>
+                          <SelectItem value="min">最小値</SelectItem>
+                          <SelectItem value="max">最大値</SelectItem>
+                          <SelectItem value="regex">正規表現</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    <Label>値:</Label>
+                    <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} required />
+                    <Label>エラーメッセージ:</Label>
+                      <Input type="text" value={message} onChange={(e) => setMessage(e.target.value)} />
+                  </div>
+                )} */}
 
                 {(question.type === "button" || question.type === "image_carousel") && (
                   <div className="space-y-4">

@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       icon: <MessageSquare className="h-5 w-5" />,
     },
     {
-      href: "/admin/question-behavior",
+      href: "/admin/actions",
       label: "アクション設定",
       icon: <MessageSquare className="h-5 w-5" />,
     },
